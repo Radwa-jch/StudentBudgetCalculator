@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حساب إيرادات الفصول والعجز في الميزانية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#5c7a5e;
+    --sage-dark:#3f5a41;
+    --sage-light:#e8f0e6;
+    --peach:#e8935f;
+    --peach-light:#fbe6d6;
+    --cream:#fbf9f4;
+    --ink:#2c332c;
+    --line:#dbe3d8;
+    --white:#ffffff;
+    --danger:#c1554a;
+    --danger-light:#fbe9e7;
+    --good:#3f8a5c;
+    --good-light:#e5f4ea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    font-family:'Tajawal', 'Cairo', sans-serif;
+    color:var(--ink);
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-icon{
+    width:46px;height:46px;border-radius:14px;
+    background:linear-gradient(135deg,var(--peach),#c96a34);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;flex-shrink:0;
+  }
+  h1{
+    font-family:'Cairo',sans-serif;
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--sage-dark);
+  }
+  .subtitle{font-size:13px;color:#7a8478;margin-top:2px;}
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(60,80,60,0.04);
+  }
+  .card h2{
+    font-family:'Cairo',sans-serif;
+    font-size:16px;
+    color:var(--sage-dark);
+    margin:0 0 16px;
+  }
+
+  .settings-row{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+    min-width:180px;
+  }
+  .field label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--sage-dark);
+  }
+  .field input, .field select{
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:15px;
+    font-family:inherit;
+    background:var(--cream);
+    color:var(--ink);
+    transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--sage);
+    background:var(--white);
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:6px;
+  }
+  thead th{
+    text-align:right;
+    font-size:13px;
+    color:var(--sage-dark);
+    font-weight:700;
+    padding:10px 12px;
+    border-bottom:2px solid var(--sage-light);
+  }
+  tbody td{
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody tr:hover{background:#f7faf6;}
+  .name-input{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    padding:6px 4px;
+    border-radius:8px;
+  }
+  .name-input:focus{outline:none;background:var(--sage-light);}
+  .num-input{
+    width:100px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:7px 10px;
+    font-family:inherit;
+    font-size:15px;
+    text-align:center;
+    background:var(--cream);
+  }
+  .num-input:focus{outline:none;border-color:var(--sage);background:var(--white);}
+  .total-cell{
+    font-weight:800;
+    color:var(--sage-dark);
+    font-size:15px;
+  }
+  .row-remove{
+    background:none;
+    border:none;
+    color:#b7bdb3;
+    font-size:18px;
+    cursor:pointer;
+    padding:4px 8px;
+    border-radius:8px;
+    transition:.15s;
+  }
+  .row-remove:hover{color:var(--danger);background:var(--danger-light);}
+
+  .add-row-btn{
+    margin-top:14px;
+    background:var(--sage-light);
+    color:var(--sage-dark);
+    border:1.5px dashed var(--sage);
+    border-radius:12px;
+    padding:10px 16px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    width:100%;
+    transition:.15s;
+  }
+  .add-row-btn:hover{background:var(--sage);color:var(--white);}
+
+  .summary{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--sage-dark);
+    color:var(--white);
+    border-radius:16px;
+    padding:20px 24px;
+    margin-top:4px;
+  }
+  .summary .label{font-size:14px;opacity:.85;}
+  .summary .value{font-size:28px;font-weight:800;font-family:'Cairo',sans-serif;}
+
+  .expense-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+
+  .gap-card{
+    border-radius:16px;
+    padding:22px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    transition:.2s;
+  }
+  .gap-card.good{background:var(--good-light);border:1.5px solid var(--good);}
+  .gap-card.bad{background:var(--danger-light);border:1.5px solid var(--danger);}
+  .gap-card .label{font-size:14px;font-weight:700;}
+  .gap-card.good .label, .gap-card.good .value{color:var(--good);}
+  .gap-card.bad .label, .gap-card.bad .value{color:var(--danger);}
+  .gap-card .value{font-size:26px;font-weight:800;font-family:'Cairo',sans-serif;}
+  .gap-card .hint{font-size:12px;opacity:.85;width:100%;}
+
+  .actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    border:none;
+    border-radius:12px;
+    padding:12px 20px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .btn-primary{background:var(--peach);color:#fff;}
+  .btn-primary:hover{background:#d97e46;}
+  .btn-secondary{background:var(--white);color:var(--sage-dark);border:1.5px solid var(--sage);}
+  .btn-secondary:hover{background:var(--sage-light);}
+  .btn-ghost{background:transparent;color:#8a9086;text-decoration:underline;}
+
+  .status-msg{
+    font-size:13px;
+    color:var(--sage-dark);
+    margin-top:10px;
+    min-height:18px;
+  }
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .actions, .row-remove, .add-row-btn, .status-msg{display:none !important;}
+    .card{box-shadow:none;border:1px solid #ccc;}
+  }
+
+  @media (max-width:560px){
+    .settings-row{flex-direction:column;}
+    .expense-row{flex-direction:column;}
+    thead th:nth-child(1){display:none;}
+    .summary{flex-direction:column;align-items:flex-start;gap:6px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">🏫</div>
+      <div>
+        <h1>حساب إيرادات الفصول والعجز في الميزانية</h1>
+        <div class="subtitle">اعرفي الإيراد المتوقع من كل فصل، وقارنيه بالمصروفات لمعرفة سبب أي نقص</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="settings-row">
+      <div class="field">
+        <label for="month">الشهر</label>
+        <select id="month"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>الفصول</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;"></th>
+          <th>اسم الفصل</th>
+          <th style="width:110px;">عدد الطلاب</th>
+          <th style="width:140px;">رسوم الطالب الشهرية</th>
+          <th style="width:150px;">الإيراد المتوقع</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <button class="add-row-btn" id="addRowBtn">+ إضافة فصل</button>
+  </div>
+
+  <div class="summary">
+    <span class="label">إجمالي الإيراد المتوقع من كل الفصول</span>
+    <span class="value" id="grandTotal">0 جنيه</span>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h2>مقارنة بالمصروفات (اختياري)</h2>
+    <div class="expense-row">
+      <div class="field">
+        <label for="expenses">إجمالي المصروفات الشهرية المتوقعة (مرتبات المعلمات + مصروفات أخرى)</label>
+        <input type="number" id="expenses" min="0" step="1" value="0">
+      </div>
+    </div>
+    <div class="gap-card" id="gapCard">
+      <div>
+        <div class="label" id="gapLabel">الفائض المتوقع</div>
+        <div class="value" id="gapValue">0 جنيه</div>
+      </div>
+      <div class="hint" id="gapHint"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="saveBtn">💾 حفظ بيانات هذا الشهر</button>
+    <button class="btn btn-secondary" id="printBtn">🖨️ طباعة / تصدير PDF</button>
+  </div>
+  <div class="status-msg" id="statusMsg"></div>
+
+</div>
+
+<script>
+const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const monthSelect = document.getElementById('month');
+const now = new Date();
+for(let y = now.getFullYear()-1; y <= now.getFullYear()+1; y++){
+  monthNames.forEach((m, idx)=>{
+    const opt = document.createElement('option');
+    opt.value = `${y}-${String(idx+1).padStart(2,'0')}`;
+    opt.textContent = `${m} ${y}`;
+    if(y===now.getFullYear() && idx===now.getMonth()) opt.selected = true;
+    monthSelect.appendChild(opt);
+  });
+}
+
+const rowsBody = document.getElementById('rows');
+const grandTotalEl = document.getElementById('grandTotal');
+const expensesInput = document.getElementById('expenses');
+const gapCard = document.getElementById('gapCard');
+const gapLabel = document.getElementById('gapLabel');
+const gapValue = document.getElementById('gapValue');
+const gapHint = document.getElementById('gapHint');
+const statusMsg = document.getElementById('statusMsg');
+
+const DEFAULT_CLASSES = [
+  { name: "فصل الحضانة (Nursery)", students: 10, fee: 0 },
+  { name: "فصل التمهيدي (KG1)", students: 10, fee: 0 },
+  { name: "فصل التمهيدي (KG2)", students: 10, fee: 0 },
+];
+
+function makeRow(name = "", students = 0, fee = 0){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><button class="row-remove" title="حذف الفصل">✕</button></td>
+    <td><input class="name-input" type="text" placeholder="اسم الفصل" value="${escapeHtml(name)}"></td>
+    <td><input class="num-input students-input" type="number" min="0" step="1" value="${students}"></td>
+    <td><input class="num-input fee-input" type="number" min="0" step="1" value="${fee}"></td>
+    <td class="total-cell">0 جنيه</td>
+  `;
+  tr.querySelector('.row-remove').addEventListener('click', ()=>{ tr.remove(); recalc(); });
+  tr.querySelector('.students-input').addEventListener('input', recalc);
+  tr.querySelector('.fee-input').addEventListener('input', recalc);
+  tr.querySelector('.name-input').addEventListener('input', recalc);
+  rowsBody.appendChild(tr);
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function recalc(){
+  let grand = 0;
+  rowsBody.querySelectorAll('tr').forEach(tr=>{
+    const students = parseFloat(tr.querySelector('.students-input').value) || 0;
+    const fee = parseFloat(tr.querySelector('.fee-input').value) || 0;
+    const total = students * fee;
+    grand += total;
+    tr.querySelector('.total-cell').textContent = `${total.toLocaleString('ar-EG')} جنيه`;
+  });
+  grandTotalEl.textContent = `${grand.toLocaleString('ar-EG')} جنيه`;
+
+  const expenses = parseFloat(expensesInput.value) || 0;
+  const gap = grand - expenses;
+  if(expenses > 0){
+    if(gap >= 0){
+      gapCard.classList.remove('bad'); gapCard.classList.add('good');
+      gapLabel.textContent = 'الفائض المتوقع';
+      gapValue.textContent = `${gap.toLocaleString('ar-EG')} جنيه`;
+      gapHint.textContent = 'الإيراد المتوقع يغطي المصروفات المدخلة.';
+    }else{
+      gapCard.classList.remove('good'); gapCard.classList.add('bad');
+      gapLabel.textContent = 'العجز المتوقع';
+      gapValue.textContent = `${Math.abs(gap).toLocaleString('ar-EG')} جنيه`;
+      gapHint.textContent = 'الإيراد المتوقع من الفصول أقل من المصروفات المدخلة — هذا هو مصدر النقص المحتمل عند الدفع.';
+    }
+  }else{
+    gapCard.classList.remove('bad','good');
+    gapLabel.textContent = 'أدخلي المصروفات لمعرفة الفائض أو العجز';
+    gapValue.textContent = '—';
+    gapHint.textContent = '';
+  }
+}
+
+expensesInput.addEventListener('input', recalc);
+
+document.getElementById('addRowBtn').addEventListener('click', ()=>{
+  makeRow();
+  recalc();
+});
+
+document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+function getStateKey(){
+  return `nursery-revenue:${monthSelect.value}`;
+}
+
+function collectState(){
+  const classes = [];
+  rowsBody.querySelectorAll('tr').forEach(tr=>{
+    classes.push({
+      name: tr.querySelector('.name-input').value,
+      students: parseFloat(tr.querySelector('.students-input').value) || 0,
+      fee: parseFloat(tr.querySelector('.fee-input').value) || 0
+    });
+  });
+  return { classes, expenses: parseFloat(expensesInput.value) || 0 };
+}
+
+function applyState(state){
+  rowsBody.innerHTML = '';
+  expensesInput.value = state.expenses ?? 0;
+  (state.classes || []).forEach(c => makeRow(c.name, c.students, c.fee));
+  if((state.classes || []).length === 0){
+    DEFAULT_CLASSES.forEach(c => makeRow(c.name, c.students, c.fee));
+  }
+  recalc();
+}
+
+async function loadClassRoster(){
+  try{
+    const res = await window.storage.get('nursery-revenue:roster', false);
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){ /* لا توجد قائمة محفوظة بعد */ }
+  return null;
+}
+
+async function saveClassRoster(classes){
+  try{
+    await window.storage.set('nursery-revenue:roster', JSON.stringify(classes), false);
+  }catch(e){ console.error('roster save failed', e); }
+}
+
+async function loadMonth(){
+  statusMsg.textContent = 'جارِ التحميل...';
+  try{
+    const res = await window.storage.get(getStateKey(), false);
+    if(res && res.value){
+      applyState(JSON.parse(res.value));
+      statusMsg.textContent = 'تم تحميل بيانات هذا الشهر المحفوظة مسبقاً.';
+      return;
+    }
+  }catch(e){ /* لا توجد بيانات محفوظة لهذا الشهر */ }
+
+  const roster = await loadClassRoster();
+  if(roster && roster.length){
+    applyState({ classes: roster, expenses: parseFloat(expensesInput.value) || 0 });
+    statusMsg.textContent = 'شهر جديد: تم إحضار بيانات الفصول المحفوظة مسبقاً.';
+  }else{
+    applyState({ classes: [], expenses: 0 });
+    statusMsg.textContent = '';
+  }
+}
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const state = collectState();
+  statusMsg.textContent = 'جارِ الحفظ...';
+  try{
+    await window.storage.set(getStateKey(), JSON.stringify(state), false);
+    await saveClassRoster(state.classes);
+    statusMsg.textContent = `✔ تم حفظ بيانات ${monthSelect.options[monthSelect.selectedIndex].text} بنجاح.`;
+  }catch(e){
+    statusMsg.textContent = 'حدث خطأ أثناء الحفظ، حاولي مرة أخرى.';
+  }
+});
+
+monthSelect.addEventListener('change', loadMonth);
+
+loadMonth();
+</script>
+</body>
+</html>
